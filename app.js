@@ -110,16 +110,29 @@ app.get("/:customListName",(req,res)=>{                   // here we'll store ev
   app.post("/", function(req, res){
 
     const itemName = req.body.newItem;
-    const listName = req.body.list;              // getting name of button that contains value as name of new todolist
-
+    const listName = req.body.list.trim();              // getting name of button that contains value as name of new todolist
+    
+    // .trim() took my 3rd day this is my 3rd revisiting this code and finally got it
+    // .trim  will remove spaces when we stored the title of todolist in listName variable it stored as string and it contains some extra spaces so trim those space first before use or else you will get err: cant read properties of null i.e cant read spaces
+    
     const item = Item({                         // Again to save our new item in Item collection we'll add by mongodb methode.                  
       name: itemName
     });
 
-    item.save();          // it will save our new todolist item directly to database.as soon as we clicked on + button here whole code will run again and this time our foundItems will send 4 total items form database to list.ejs page.
-    res.redirect("/");
-    // remember at first when ever any data is inserted in db it wont show on webpage until you refresh the page. thats why we use redirect to do this auto.
+    if (listName === "Today"){
+      item.save();          // it will save our new todolist item directly to database.as soon as we clicked on + button here whole code will run again and this time our foundItems will send 4 total items form database to list.ejs page.
+      res.redirect("/");
+      // remember at first when ever any data is inserted in db it wont show on webpage until you refresh the page. thats why we use redirect to do this auto.
+  
+    }else{
+      List.findOne({name: listName}, function(err,foundList){
+        foundList.items.push(item);
+        foundList.save();
+        res.redirect("/" + listName);
+      });
+    }
 
+   
   });
 
 app.post("/delete", function(req,res){
