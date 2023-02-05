@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const { DiffieHellmanGroup } = require("crypto");
 mongoose.set('strictQuery', true);
 const mongoDB = "mongodb://127.0.0.1:27017/todolistDB";
+const _ = require("lodash");
 
 const app = express();
 
@@ -82,7 +83,7 @@ app.get("/", function(req, res) {
 
 
 app.get("/:customListName",(req,res)=>{                   // here we'll store every new list name and prefeteched defautl items in our database
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);     //_.captalize : to format our custom list name in Li format i.e fitst capital rest small : so that user cant create a list with capital and small name
 
   //finding one so that user cant create a custom list with same name again and agin
 
@@ -136,13 +137,33 @@ app.get("/:customListName",(req,res)=>{                   // here we'll store ev
   });
 
 app.post("/delete", function(req,res){
-  const checkedItemId = req.body.checkbox;                   //here we logged id of checked item and delete it by findid method and redirected to auto refresh page to immediate removel of checked item form page
-  Item.findByIdAndRemove(checkedItemId,function(err){
-    if(!err){
-      console.log("Successfully deleted checked item");
-      res.redirect("/");
-    }
-  });
+  
+  const checkedItemId = req.body.checkbox.trim();                   //here we logged id of checked item and delete it by findid method and redirected to auto refresh page to immediate removel of checked item form page
+  
+  const hiddenListName = req.body.hiddenListName.trim();
+
+  if(hiddenListName === "Today"){                           // It means the delete req is from root route so find it in Item collection by id and delted it.
+    Item.findByIdAndRemove(checkedItemId,function(err){
+      if(!err){
+        console.log("Successfully deleted checked item");
+        res.redirect("/");
+      }
+    });
+  }else{                                                   // else delete req come form custom list: so we need to find that particular item from our List collection and that item is stored in items array . since it is soted in array we cant simply findby id and delete it.
+    List.findOneAndUpdate({name: hiddenListName},{$pull: {items: { _id: checkedItemId}}}, function(err,foundList){
+      if(!err){
+        res.redirect("/" + hiddenListName);
+      }
+    });                                                 
+  }
+  
+  // Model.findOne'andUpdate( {condition}, {update}, function(err,result))   we'll pass 3 parameters
+  //                        ({what do we want to find}, {what to update so : we want to remove a particular item from array we'll below $pull for that},  {callback for err and result})
+  //                         ({so we want to find customlist name from array and that name we stored in hiddenlistname})
+  //{$pull: {{field: {-id: value}}}
+  //{find an item whose name is :  {form array : {whose _id is: id name}}}
+  // $pull : operator removes that specific item from array once it came out from array we can delete it
+  // findOne corresponds to foundList: i.e foundList will store the results of our qurey
   
 });
 
