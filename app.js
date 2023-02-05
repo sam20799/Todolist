@@ -6,7 +6,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const { DiffieHellmanGroup } = require("crypto");
 mongoose.set('strictQuery', true);
-const mongoDB = "mongodb://127.0.0.1:27017/todolistDB";
+// const mongoDB = "mongodb://127.0.0.1:27017/todolistDB"  for you local mogodb database
+const mongoDB = "mongodb+srv://SAM:Janu%401234@cluster0.vmpoy7o.mongodb.net/todolistDB?retryWrites=true&w=majority"; // for cloud database
 const _ = require("lodash");
 
 const app = express();
@@ -16,7 +17,12 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect(mongoDB,(err)=>{
+const connectionParams = {
+  
+  useUnifiedTopology: true
+}
+
+mongoose.connect(mongoDB, connectionParams,(err)=>{
   if(err){
     console.log(err);
   }else{
