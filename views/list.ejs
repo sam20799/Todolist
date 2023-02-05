@@ -12,13 +12,15 @@
         <input type="checkbox" name="checkbox" value="<%=item._id%>" onchange="this.form.submit()">
         <p><%=  item.name  %></p>
       </div>
+      <input type="hidden" name="hiddenListName" value="<%= listTitle %>"></input>    <!--this hidden text cant be seen by users but we can use its name it to delete items form custom list-->
     </form> 
+    
 
 <%   }); %>
 
       <form class="item" action="/" method="post">
-        <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
-        <button type="submit" name="list" value="<%= listTitle  %> ">+</button>
+        <input type="text" name="newItem" placeholder="New Item" autocomplete="off" required>    
+        <button type="submit" name="list" value="<%= listTitle  %> ">+</button>         <!--value will give title name when + button will be pressed and throug button male i.e list we can access it on app.js-->
       </form>
   </div>
 
